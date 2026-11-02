@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(waos_contracts LANGUAGES CXX)
+project(waos_contracts LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -121,7 +121,7 @@ else()
     ${RPC_SRC}
   )
   target_link_libraries(dbg_forward_integration_ut PRIVATE
-    Boost::ut waos_db contracts_socket_test_stub
+    Boost::ut cpp_rpc waos_db contracts_socket_test_stub
   )
   set_target_properties(contracts_smoke dbg_forward_integration_ut PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
