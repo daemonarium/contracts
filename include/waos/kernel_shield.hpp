@@ -1,0 +1,69 @@
+#pragma once
+
+#include <string>
+#include <cstdint>
+#include <vector>
+#include <memory>
+
+#include "serialization/annotations.hpp"
+#include "serialization/promise.hpp"
+#include <waos/kernel.hpp>
+
+namespace waos {
+
+  class kernel_shield {
+    public:
+      kernel_shield() = default;
+
+      using process_id = kernel::process_id;
+      using socket_id = kernel::socket_id;
+      using direction = kernel::direction;
+
+      // Kernel API shielded.
+
+      static std::shared_ptr<serialization::promise<process_id>> spawn(binary code, size_t memory_limit, size_t mana_limit);
+      static std::shared_ptr<serialization::promise<process_id>> resurect(binary code, binary memory,
+                                                                          size_t memory_limit, size_t mana_limit);
+
+      static std::shared_ptr<serialization::promise<process_id>> spawn_isolated(binary code, size_t memory_limit, size_t mana_limit);
+      static std::shared_ptr<serialization::promise<process_id>> resurect_isolated(binary code, binary memory,
+                                                                                    size_t memory_limit, size_t mana_limit);
+
+      static std::shared_ptr<serialization::promise<void>> register_process(process_id id, process_id spawned_by, bool isolated);
+      static std::shared_ptr<serialization::promise<void>> unregister_process(process_id id);
+
+      static std::shared_ptr<serialization::promise<save_result>> save(process_id id);
+      static std::shared_ptr<serialization::promise<void>> kill(process_id id);
+
+      static std::shared_ptr<serialization::promise<void>> bind(process_id process_from, socket_id socket_from,
+                   process_id process_to, socket_id socket_to,
+                   direction direction);
+      static std::shared_ptr<serialization::promise<void>> unbind(process_id process_from, socket_id socket_from,
+                      process_id process_to, socket_id socket_to,
+                      direction direction);
+
+      static std::shared_ptr<serialization::promise<void>> monitor(process_id target,
+                                                            process_id monitor, socket_id monitor_socket,
+                                                            monitor_config config);
+      static std::shared_ptr<serialization::promise<void>> demonitor(process_id target,
+                                                              process_id monitor, socket_id monitor_socket);
+
+      static std::shared_ptr<serialization::promise<size_t>> measure_mana(process_id process, size_t new_mana);
+
+      static std::shared_ptr<serialization::promise<void>> set_mana_limit(process_id process, size_t mana_limit);
+
+      static std::shared_ptr<serialization::promise<std::vector<kernel::socket_binding>>> list_socket_bindings(process_id id);
+
+      static std::shared_ptr<serialization::promise<binary>> get_rpc_description(process_id id, socket_id socket);
+
+      // Additional API.
+
+      static std::shared_ptr<serialization::promise<binary>> request(process_id process_id, binary request);
+
+      // Host-side native process. Appended so existing shield method ids stay put.
+      static std::shared_ptr<serialization::promise<process_id>> spawn_native(
+          std::string service_type, std::string data_dir,
+          std::uint32_t socket_count, std::uint32_t mana_limit);
+  };
+
+}
